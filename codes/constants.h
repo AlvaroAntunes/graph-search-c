@@ -1,0 +1,3 @@
+#define TAM_ALGORITHM 4
+#define TAM_NAME 100
+#define PATH_ARQ 1000
