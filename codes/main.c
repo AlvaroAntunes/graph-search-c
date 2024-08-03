@@ -36,7 +36,7 @@ int main () {
         City *city = city_construct(name, x, y, n_neighbor, idx_city);
 
         for (int i = 0; i < n_neighbor; i++) { /*Leitura de todos os vizinhos de cada cidade (o vizinho possui distância até
-                                                o pai e índice no vetor de todas as cidades).*/
+                                                o pai e índice que ele está no vetor de todas as cidades).*/
             int idx;
             float distance;
 

@@ -18,13 +18,15 @@ Frontier *frontier_construct() {
     return f;
 }
 
-//Nessa função faço toda a busca no grafo, então a lógica geral do programa está aqui
+//Nessa função faço toda a busca no grafo, então a lógica geral do programa está aqui.
 void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cmp_min_path)(void*, void*)) {
     Vector *visited = vector_construct();
 
     Frontier *f = frontier_construct();
     City *dest_city = get_city(cities, dest);
 
+
+    //Atribuo as funções das operações da fronteira de acordo com o algoritmo, pois a depender do algoritmo, as estruturas utilizadas serão diferentes.
     if (!strcmp(algorithm, "DFS") || !strcmp(algorithm, "BFS")) {
         f->frontier = (void *)deque_construct();
         f->push = bfs_dfs_push;
@@ -59,7 +61,7 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
     
     int dest_found = 0;
 
-    while (f->size_frontier(f->frontier) > 0) { //Procuro a cidade de destino enquanto a fronteira tem alguma cidade.
+    while (f->size_frontier(f->frontier) > 0) { //Procuro a cidade destino enquanto a fronteira tem alguma cidade.
         City *current_city = f->pop(f->frontier);
 
         if (cmp_cities(dest_city, current_city)) {
@@ -67,52 +69,55 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
             vector_push_back(visited, current_city);
             break;
         }
-        else if (vector_find(visited, current_city, eq_name_city) != -1) {
+        else if (vector_find(visited, current_city, eq_name_city) != -1) { //Se a cidade já foi visitada, ignoro ela e vou para próxima.
             continue;
         } 
             
         int n_neighbor = get_num_neighbor(current_city);
 
-        for (int i = 0; i < n_neighbor; i++) {
-            int idx_neighbor = get_idx_neighbor(vector_get(get_neighbor(current_city), i)); //Pego o índice do vizinho no vetor de todas as cidades.
+        for (int i = 0; i < n_neighbor; i++) { //Aqui eu vou inserir na fronteira todas as cidades vizinhas da cidade atual (current_city).
+            int idx_neighbor = get_idx_neighbor(vector_get(get_neighbor(current_city), i)); //Pego o índice da cidade vizinha no vetor de todas as cidades.
             float distance_neighbor = get_distance_neighbor(vector_get(get_neighbor(current_city), i)); //Pego a distância do vizinho até a cidade atual.
-            City *neighbor_city = get_city(cities, idx_neighbor); //Pego a cidade que representa aquele vizinho.
+            City *neighbor_city = get_city(cities, idx_neighbor); //Pego a cidade vizinha.
 
-            if (vector_find(visited, neighbor_city, eq_name_city) != -1) { //Se a cidade já foi visitada, eu não coloco ela na fronteira.
+            if (vector_find(visited, neighbor_city, eq_name_city) != -1) { //Se a cidade vizinha já foi visitada, eu não coloco ela na fronteira.
                 continue;
             }
 
-            else if (parent[idx_neighbor] != -1) {
+            else if (parent[idx_neighbor] != -1) { //Caso a cidade vizinha já tenha um pai, eu verifico se o algoritmo é A* ou UCS para, se for preciso, fazer a alteração de quem é o pai dela (caso esse novo pai tenha um menor caminho).
                 if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) {
+                    //Essa é distância da cidade vizinha até a origem e até o destino com o pai anterior.
                     float distance_old = get_distance_origin(get_city(cities, idx_neighbor)) + get_distance_heuristic(get_city(cities, idx_neighbor));
+
+                    //Essa é distância da cidade vizinha até a origem e até o destino com o caminho partindo da cidade atual, então pode ser um melhor caminho para explorar.
                     float distance_new = get_distance_origin(get_city(cities, get_idx_city(current_city))) + distance_neighbor + get_distance_heuristic(get_city(cities, idx_neighbor));
 
-                    if (distance_old > distance_new) {
-                            parent[idx_neighbor] = get_idx_city(current_city);
+                    if (distance_old > distance_new) { //Caso a distância partindo da cidade atual seja menor, eu faço a troca de índice e distância (o pai da cidade muda).
+                            parent[idx_neighbor] = get_idx_city(current_city); //Índice do pai da cidade vizinha.
                             distances[idx_neighbor] = distance_neighbor; //Distância da cidade vizinha até o pai.
                     }
                 }
             }
-            else {
+            else { //Se ela ainda não tiver um pai, eu seto a cidade atual como pai dela.
                 parent[idx_neighbor] = get_idx_city(current_city);
-                distances[idx_neighbor] = distance_neighbor; //Distância da cidade vizinha até o pai.
+                distances[idx_neighbor] = distance_neighbor;
             }
 
-            if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) {
+            if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) { //Eu preciso setar a distância da cidade até a origem e a distância heurística apenas se o algoritmo for A* ou UCS.
                 float distance_total = 0; //Essa distância é a distância da cidade até a origem.
-                while (idx_neighbor != origin) {
+                while (idx_neighbor != origin) { //Vou fazendo o caminho de volta até chegar na origem.
                     distance_total += distances[idx_neighbor];
                     idx_neighbor = parent[idx_neighbor];
                 }
                 set_distance_origin(neighbor_city, distance_total); //Setando a distância da cidade até a origem.
 
-                if(!strcmp(algorithm, "A*")) {
-                    set_distance_heuristic(neighbor_city, dest_city); //Setando a distância heurística (distância euclidiana de duas cidades com coordenadas(x,y))
+                if(!strcmp(algorithm, "A*")) { //Utilizo a distância heurística apenas para o A*.
+                    set_distance_heuristic(neighbor_city, dest_city); //Setando a distância heurística (distância euclidiana de duas cidades com coordenadas(x,y)).
                 }
             }
-            f->push(f->frontier, neighbor_city);
+            f->push(f->frontier, neighbor_city); //Coloco a cidade vizinha na fronteira.
         }
-        vector_push_back(visited, current_city);
+        vector_push_back(visited, current_city); //Coloco a cidade que acabei de expandir (visitar) no vetor de visitados.
     }
 
     if (dest_found) {
@@ -120,7 +125,7 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
         float distance_total = 0;
 
         int current = dest;
-        while (current != -1) { //Aqui eu recupero o caminho da cidade de destino até a origem, junto com o custo em KM.
+        while (current != -1) { //Aqui eu recupero o caminho da cidade de destino até a origem, junto com o custo.
             stack_push(path, get_city(cities, current));
             distance_total += distances[current];
             current = parent[current];
@@ -175,11 +180,10 @@ void *a_star_ucs_pop(void *frontier) {
     return heap_pop((Heap *)frontier);
 }
 
-//Primeiro desaloco todas as cidades do meu grafo, depois basta desalocar todas as estruturas utilizadas.
 void destroy_graph(Vector *cities, Vector *visited, Frontier *f) {
     int size = vector_size(cities);
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) { //Primeiro desaloco todas as cidades do meu grafo, depois basta desalocar todas as estruturas utilizadas.
         City *c = (City *)vector_pop_back(cities);
         city_destroy(c);
     }

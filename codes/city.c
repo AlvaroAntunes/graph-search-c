@@ -51,8 +51,9 @@ int eq_name_city(void *c1, void *c2) {
 
 //Para verificar se duas cidades são iguais, eu faço a verificação apenas do nome.
 int cmp_cities(City *dest_city, City *current_city) {
-    if (!strcmp(dest_city->name, current_city->name))
+    if (!strcmp(dest_city->name, current_city->name)) {
         return 1;
+    }
     return 0;
 }
 
