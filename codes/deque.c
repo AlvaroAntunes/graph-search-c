@@ -91,6 +91,18 @@ data_type deque_pop_front(Deque *f) {
 
 }
 
+int deque_find(Deque *f, data_type item, int(*eq_name)(void*,void*)) {
+    int i = f->start;
+
+    while (i != f->end) {
+        if (eq_name(item, f->arr[i])) {
+            return i;
+        }
+        i = (i + 1) % f->allocated;
+    }
+    return -1;
+}
+
 void deque_destroy(Deque *f) {
     if (f != NULL) {
         if (f->arr != NULL) {

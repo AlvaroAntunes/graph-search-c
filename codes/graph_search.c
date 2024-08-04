@@ -10,6 +10,7 @@ struct Frontier {
     void*(*pop)(void*);
     void(*frontier_destroy)(void*);
     int(*size_frontier)(void *);
+    int(*frontier_find)(void*,void*,int(*)(void*,void*));
     void *frontier;
 };
 
@@ -20,6 +21,7 @@ Frontier *frontier_construct() {
 
 //Nessa função faço toda a busca no grafo, então a lógica geral do programa está aqui.
 void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cmp_min_path)(void*, void*)) {
+    int priority = 0;
     Vector *visited = vector_construct();
 
     Frontier *f = frontier_construct();
@@ -27,11 +29,12 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
 
 
     //Atribuo as funções das operações da fronteira de acordo com o algoritmo, pois a depender do algoritmo, as estruturas utilizadas serão diferentes.
-    if (!strcmp(algorithm, "DFS") || !strcmp(algorithm, "BFS")) {
+    if (bfs_or_dfs(algorithm)) {
         f->frontier = (void *)deque_construct();
         f->push = bfs_dfs_push;
         f->frontier_destroy = bfs_dfs_destroy;
         f->size_frontier = bfs_dfs_size;
+        f->frontier_find = deque_find_frontier;
 
         if (!strcmp(algorithm, "DFS")) {
             f->pop = dfs_pop;
@@ -40,21 +43,23 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
             f->pop = bfs_pop;
         }
     }
-    else if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) {
+    else if (a_star_or_ucs(algorithm)) {
         f->frontier = (void *)heap_constructor(cmp_min_path);
         f->push = a_star_ucs_push;
         f->pop = a_star_ucs_pop;
         f->frontier_destroy = a_star_ucs_destroy;
         f->size_frontier = a_star_ucs_size;
+        f->frontier_find = heap_find_frontier;
     }
 
     //Começarei com a cidade de origem, por isso faço essa inserção na fronteira.
     f->push(f->frontier, vector_get(cities, origin));
 
     int num_cities = vector_size(cities);
-    int parent[num_cities]; //Esse vetor é utilizado para recuperar o caminho percorrido até uma certa cidade.
-    float distances[num_cities]; //Esse vetor guarda a distância de uma cidade até o seu pai.
-    for (int i = 0; i < num_cities; i++) { //Aqui faço a inicialização dos dois vetores.
+    int parent[num_cities]; //Esse array é utilizado para recuperar o caminho percorrido até uma certa cidade.
+    float distances[num_cities]; //Esse array guarda a distância de uma cidade até o seu pai.
+
+    for (int i = 0; i < num_cities; i++) { //Aqui faço a inicialização dos dois arrays.
         parent[i] = -1;
         distances[i] = 0;
     }
@@ -64,7 +69,7 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
     while (f->size_frontier(f->frontier) > 0) { //Procuro a cidade destino enquanto a fronteira tem alguma cidade.
         City *current_city = f->pop(f->frontier);
 
-        if (cmp_cities(dest_city, current_city)) {
+        if (cmp_cities(dest_city, current_city)) { //Se a cidade foi encontrada, eu saio do loop.
             dest_found = 1;
             vector_push_back(visited, current_city);
             break;
@@ -85,16 +90,18 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
             }
 
             else if (parent[idx_neighbor] != -1) { //Caso a cidade vizinha já tenha um pai, eu verifico se o algoritmo é A* ou UCS para, se for preciso, fazer a alteração de quem é o pai dela (caso esse novo pai tenha um menor caminho).
-                if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) {
+                if (a_star_or_ucs(algorithm)) {
                     //Essa é distância da cidade vizinha até a origem e até o destino com o pai anterior.
-                    float distance_old = get_distance_origin(get_city(cities, idx_neighbor)) + get_distance_heuristic(get_city(cities, idx_neighbor));
+                    float distance_old = get_distance_origin(neighbor_city) + get_distance_heuristic(neighbor_city);
 
                     //Essa é distância da cidade vizinha até a origem e até o destino com o caminho partindo da cidade atual, então pode ser um melhor caminho para explorar.
-                    float distance_new = get_distance_origin(get_city(cities, get_idx_city(current_city))) + distance_neighbor + get_distance_heuristic(get_city(cities, idx_neighbor));
+                    float distance_new = get_distance_origin(current_city) + distance_neighbor + get_distance_heuristic(neighbor_city);
 
                     if (distance_old > distance_new) { //Caso a distância partindo da cidade atual seja menor, eu faço a troca de índice e distância (o pai da cidade muda).
-                            parent[idx_neighbor] = get_idx_city(current_city); //Índice do pai da cidade vizinha.
-                            distances[idx_neighbor] = distance_neighbor; //Distância da cidade vizinha até o pai.
+                        parent[idx_neighbor] = get_idx_city(current_city); //Índice do pai da cidade vizinha.
+                        distances[idx_neighbor] = distance_neighbor; //Distância da cidade vizinha até o pai.
+
+                        priority = 1; //Flag para saber que o pai foi alterado e essa alteração deve ser feita na heap.
                     }
                 }
             }
@@ -103,7 +110,7 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
                 distances[idx_neighbor] = distance_neighbor;
             }
 
-            if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) { //Eu preciso setar a distância da cidade até a origem e a distância heurística apenas se o algoritmo for A* ou UCS.
+            if (a_star_or_ucs(algorithm)) { //Eu preciso setar a distância da cidade até a origem e a distância heurística apenas se o algoritmo for A* ou UCS.
                 float distance_total = 0; //Essa distância é a distância da cidade até a origem.
                 while (idx_neighbor != origin) { //Vou fazendo o caminho de volta até chegar na origem.
                     distance_total += distances[idx_neighbor];
@@ -114,33 +121,27 @@ void graph_search(int origin, int dest, Vector *cities, char *algorithm, int(*cm
                 if(!strcmp(algorithm, "A*")) { //Utilizo a distância heurística apenas para o A*.
                     set_distance_heuristic(neighbor_city, dest_city); //Setando a distância heurística (distância euclidiana de duas cidades com coordenadas(x,y)).
                 }
+
+                if (f->frontier_find(f->frontier, neighbor_city, eq_name_city) != -1 && priority) { //Faço a troca da cidade na fronteira se a prioridade tiver mudado (preciso rearranjar a heap).
+                    heap_swap_priority(f->frontier, neighbor_city, eq_name_city);
+                    priority = 0;
+                }
             }
-            f->push(f->frontier, neighbor_city); //Coloco a cidade vizinha na fronteira.
+
+            if (f->frontier_find(f->frontier, neighbor_city, eq_name_city) == -1) { //Se a cidade não está na fronteira, coloco ela.
+                f->push(f->frontier, neighbor_city);
+            }
         }
         vector_push_back(visited, current_city); //Coloco a cidade que acabei de expandir (visitar) no vetor de visitados.
     }
 
     if (dest_found) {
-        Stack *path = stack_constructor();
-        float distance_total = 0;
-
-        int current = dest;
-        while (current != -1) { //Aqui eu recupero o caminho da cidade de destino até a origem, junto com o custo.
-            stack_push(path, get_city(cities, current));
-            distance_total += distances[current];
-            current = parent[current];
-        }
-        while (stack_size(path)) {
-            City* city = (City *)stack_pop(path);
-            print_name_city(city);
-        }
-        stack_destroy(path);
-
-        printf("Custo: %.2f Num_Expandidos: %d\n", distance_total, vector_size(visited));
+        print_path(cities, dest, distances, parent, vector_size(visited));
     } 
     else {
         printf("IMPOSSIVEL\n");
     }
+
     destroy_graph(cities, visited, f);
 }
 
@@ -178,6 +179,51 @@ int a_star_ucs_size(void *frontier) {
 
 void *a_star_ucs_pop(void *frontier) {
     return heap_pop((Heap *)frontier);
+}
+
+int a_star_or_ucs(char *algorithm) {
+    if (!strcmp(algorithm, "UCS") || !strcmp(algorithm, "A*")) {
+        return 1;
+    }
+    return 0;
+}
+
+int bfs_or_dfs(char *algorithm) {
+    if (!strcmp(algorithm, "BFS") || !strcmp(algorithm, "DFS")) {
+        return 1;
+    }
+    return 0;
+}
+
+int heap_find_frontier(void *frontier, void *city, int(*eq_name)(void*,void*)) {
+    Heap *heap = (Heap *)frontier;
+
+    return heap_find(heap, city, eq_name);
+}
+
+int deque_find_frontier(void *frontier, void *city, int(*eq_name)(void*,void*)) {
+    Deque *deque = (Deque *)frontier;
+
+    return deque_find(deque, city, eq_name);
+}
+
+void print_path(Vector *cities, int dest, float *distances, int *parent, int visited) {
+    Stack *path = stack_constructor();
+    float distance_total = 0;
+
+    int current = dest;
+    while (current != -1) { //Aqui eu recupero o caminho da cidade de destino até a origem, junto com o custo.
+        stack_push(path, get_city(cities, current));
+        distance_total += distances[current];
+        current = parent[current];
+    }
+    while (stack_size(path)) {
+        City* city = (City *)stack_pop(path);
+        print_name_city(city);
+    }
+    stack_destroy(path);
+
+    printf("Custo: %.2f Num_Expandidos: %d\n", distance_total, visited);
 }
 
 void destroy_graph(Vector *cities, Vector *visited, Frontier *f) {

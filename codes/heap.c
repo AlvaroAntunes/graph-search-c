@@ -71,6 +71,33 @@ int heap_size(Heap *heap) {
     return vector_size(heap->v);
 }
 
+int heap_find(Heap *heap, data_type data, int(*eq_name)(void*,void*)) {
+    return vector_find(heap->v, data, eq_name);
+}
+
+void heap_swap_priority(Heap *heap, data_type data, int(*eq_name)(void*,void*)) {
+    int idx = 0;
+
+    for (int i = 0; i < heap_size(heap); i++) {
+        if (eq_name(vector_get(heap->v, i), data)) {
+            idx = i;
+            break;
+        }
+    }
+
+    while (idx > 0) {
+        int idx_father = (idx - 1) / 2;
+
+        if (heap->cmp_fn(data, vector_get(heap->v, idx_father)) < 0) {
+            vector_swap(heap->v, idx, idx_father);
+            idx = idx_father;
+        } 
+        else {
+            break;
+        }
+    }
+}    
+
 void heap_destroy(Heap *heap) {
     if (heap != NULL) {
         if (heap->v != NULL) {

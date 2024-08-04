@@ -31,6 +31,16 @@ int a_star_ucs_size(void *frontier);
 
 void *a_star_ucs_pop(void *frontier);
 
+int a_star_or_ucs(char *algorithm);
+
+int bfs_or_dfs(char *algorithm);
+
+int heap_find_frontier(void *frontier, void *city, int(*eq_name)(void*,void*));
+
+int deque_find_frontier(void *frontier, void *city, int(*eq_name)(void*,void*));
+
+void print_path(Vector *cities, int dest, float *distances, int *parent, int visited);
+
 //Desaloca todos os vetores, as cidades e a fronteira.
 void destroy_graph(Vector *cities, Vector *visited, Frontier *f);
 
