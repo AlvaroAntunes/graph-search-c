@@ -78,13 +78,8 @@ int heap_find(Heap *heap, data_type data, int(*eq_name)(void*,void*)) {
 void heap_swap_priority(Heap *heap, data_type data, int(*eq_name)(void*,void*)) {
     int idx = 0;
 
-    for (int i = 0; i < heap_size(heap); i++) {
-        if (eq_name(vector_get(heap->v, i), data)) {
-            idx = i;
-            break;
-        }
-    }
-
+    idx = heap_find(heap, data, eq_name);
+    
     while (idx > 0) {
         int idx_father = (idx - 1) / 2;
 
