@@ -1,1 +1,42 @@
-# work-data-structure
+# Busca em grafos
+Este projeto implementa os algoritmos de busca em grafos DFS (Depth-First Search), BFS (Breadth-First Search), UCS (Uniform Cost Search) e A* para encontrar o caminho entre duas cidades em um grafo.
+
+![Grafo](imagens/image-grafo.png)
+
+## Descrição e contexto
+
+Leopoldo ama viajar e conhecer lugares, mas não possui um mapa nem um celular. Para tentar chegar em um local objetivo (por exemplo, Iconha), sempre que ele chega em uma nova cidade, ele pergunta para os moradores quais são as cidades vizinhas e a distância para estas cidades. A depender do algoritmo selecionado para fazer a busca no grafo, ele escolhe uma cidade dentre as possibilidades para visitar. Leopoldo repete o processo até chegar no objetivo.
+
+Esse projeto foi criado na disciplina de Estrutura de Dados da Universidade Federal do Espírito Santo (UFES) para utilizar, principalmente, as estruturas de dados Heap e Deque, além da implementação dos algoritmos DFS, BFS, UCS e A* para busca em grafos.
+
+- Heap: Para a implementação eficiente de algoritmos de busca que requerem a extração do menor custo.
+- Deque: Para a implementação de busca em largura (BFS) e busca em profundidade (DFS).
+- DFS (Depth-First Search): Um algoritmo que explora o máximo possível em cada ramificação antes de retroceder.
+- BFS (Breadth-First Search): Um algoritmo que explora todos os nós no nível atual antes de passar para o próximo nível.
+- UCS (Uniform Cost Search): Um algoritmo que expande o nó com o menor custo acumulado.
+- A*: Um algoritmo que usa uma função heurística para estimar o custo total até o objetivo e encontrar o caminho mais eficiente.
+
+## Requisitos
+
+- Compilador C (ex: GCC)
+- Terminal
+
+## Como rodar
+
+- Caso já tenha o GCC (compilador C) instalado, basta seguir o passo-a-passo abaixo:
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/AlvaroAntunes/work-data-structure.git
+
+2. Navegue até o diretório do projeto:
+    ```bash
+    cd work-data-structure
+
+3. Compile:
+    ```bash
+    make
+
+4. Execute:
+   ```bash
+   make run
