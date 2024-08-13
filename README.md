@@ -13,8 +13,8 @@ Este projeto foi desenvolvido como parte da disciplina de Estruturas de Dados na
 - Deque: Para a implementação de busca em largura (BFS) e busca em profundidade (DFS).
 - DFS (Depth-First Search): Um algoritmo que explora o máximo possível em cada ramificação antes de retroceder.
 - BFS (Breadth-First Search): Um algoritmo que explora todos os nós no nível atual antes de passar para o próximo nível.
-- UCS (Uniform Cost Search): Um algoritmo que expande o nó com o menor custo acumulado.
-- A*: Um algoritmo que usa uma função heurística para estimar o custo total até o objetivo e encontrar o caminho mais eficiente.
+- UCS (Uniform Cost Search): Um algoritmo que expande o nó com o menor custo até a cidade de origem.
+- A*: Um algoritmo que usa o custo de uma cidade até a origem e uma função heurística para estimar o custo total até o objetivo e encontrar o caminho mais eficiente.
 
 ## Requisitos
 
