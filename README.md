@@ -7,7 +7,7 @@ Este projeto implementa os algoritmos de busca em grafos DFS (Depth-First Search
 
 Leopoldo ama viajar e conhecer lugares, mas não possui um mapa nem um celular. Para tentar chegar em um local objetivo (por exemplo, Iconha), sempre que ele chega em uma nova cidade, ele pergunta para os moradores quais são as cidades vizinhas e a distância para estas cidades. A depender do algoritmo selecionado para fazer a busca no grafo, ele escolhe uma cidade dentre as possibilidades para visitar. Leopoldo repete o processo até chegar no objetivo.
 
-Esse projeto foi criado na disciplina de Estrutura de Dados da Universidade Federal do Espírito Santo (UFES) para utilizar, principalmente, as estruturas de dados Heap e Deque, além da implementação dos algoritmos DFS, BFS, UCS e A* para busca em grafos.
+Este projeto foi desenvolvido como parte da disciplina de Estruturas de Dados na Universidade Federal do Espírito Santo (UFES). O objetivo é explorar e implementar as seguintes estruturas de dados e algoritmos:
 
 - Heap: Para a implementação eficiente de algoritmos de busca que requerem a extração do menor custo.
 - Deque: Para a implementação de busca em largura (BFS) e busca em profundidade (DFS).
