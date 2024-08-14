@@ -40,6 +40,7 @@ Este projeto foi desenvolvido como parte da disciplina de Estruturas de Dados na
 4. Execute:
    ```bash
    make run
-   OBS: Utilize o nome do arquivo das cidades como entrada no terminal. Exemplo: Após executar o make run, digite: ../test_cases/01_astar_input.txt no terminal.
+   OBS: Utilize o nome do arquivo das cidades como entrada no terminal.
+   Exemplo: Após executar o make run, digite: ../test_cases/01_astar_input.txt no terminal.
 
 
