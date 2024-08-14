@@ -31,7 +31,7 @@ Este projeto foi desenvolvido como parte da disciplina de Estruturas de Dados na
 
 2. Navegue até o diretório do projeto:
     ```bash
-    cd work-data-structure
+    cd work-data-structure/codes
 
 3. Compile:
     ```bash
@@ -41,5 +41,4 @@ Este projeto foi desenvolvido como parte da disciplina de Estruturas de Dados na
    ```bash
    make run
    
-   OBS: Utilize o nome do arquivo das cidades como entrada no terminal.
-   Exemplo: Após executar o make run, digite: ../test_cases/01_astar_input.txt no terminal.
+OBS: Utilize o nome do arquivo das cidades como entrada no terminal. Exemplo: Após executar o make run, digite: ../test_cases/01_astar_input.txt no terminal.
