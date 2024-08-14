@@ -27,11 +27,11 @@ Este projeto foi desenvolvido como parte da disciplina de Estruturas de Dados na
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/AlvaroAntunes/work-data-structure.git
+   git clone https://github.com/AlvaroAntunes/graph-search-c.git
 
 2. Navegue até o diretório do projeto:
     ```bash
-    cd work-data-structure/codes
+    cd graph-search-c/codes
 
 3. Compile:
     ```bash
